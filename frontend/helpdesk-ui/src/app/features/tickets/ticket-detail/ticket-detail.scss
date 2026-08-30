@@ -45,43 +45,10 @@
   margin-bottom: 16px;
 }
 
-.chip {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
+.badge-text {
+  font-size: 0.8125rem;
+  font-weight: 700;
 }
-
-.status-open { background: #e3f2fd; color: #0d47a1; }
-.status-inprogress { background: #fff8e1; color: #8d6e00; }
-.status-waitingforuser { background: #f3e5f5; color: #6a1b9a; }
-.status-escalated { background: #ffebee; color: #b71c1c; }
-.status-resolved { background: #e8f5e9; color: #1b5e20; }
-.status-closed { background: #eceff1; color: #37474f; }
-.status-reopened { background: #fff3e0; color: #e65100; }
-
-.priority-low { background: #e8f5e9; color: #1b5e20; }
-.priority-medium { background: #fff8e1; color: #8d6e00; }
-.priority-high { background: #ffe0b2; color: #e65100; }
-.priority-critical { background: #ffcdd2; color: #b71c1c; }
-
-.sla-chip {
-  display: inline-flex;
-  align-items: center;
-}
-
-.sla-dot {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-right: 6px;
-}
-
-.sla-withinsla { background: #e8f5e9; color: #1b5e20; .sla-dot { background: #2e7d32; } }
-.sla-approachingbreach { background: #fff3e0; color: #8d6e00; .sla-dot { background: #f57f17; } }
-.sla-breached { background: #ffebee; color: #b71c1c; .sla-dot { background: #c62828; } }
 
 .meta-item {
   font-size: 0.875rem;

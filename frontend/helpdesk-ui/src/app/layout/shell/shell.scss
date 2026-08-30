@@ -3,15 +3,35 @@
   height: 100vh;
 }
 
+$ink: #171923;
+$ink-elevated: #20232e;
+$ink-border: #2c2f3d;
+$ink-text-muted: #9497a8;
+$accent: #8b7cf6;
+
 .topbar {
   position: sticky;
   top: 0;
   z-index: 10;
+  background: $ink;
+  color: #f4f4f6;
+  border-bottom: 1px solid $ink-border;
 }
 
 .brand {
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Manrope', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: -0.01em;
+}
+
+.brand-mark {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
 }
 
 .spacer {
@@ -24,14 +44,36 @@
 
 .sidenav {
   width: 220px;
+  background: $ink;
+  color: #d4d5dd;
+  border-right: 1px solid $ink-border;
+  padding-top: 8px;
+
+  ::ng-deep .mat-mdc-list-item {
+    color: #d4d5dd;
+    margin: 2px 8px;
+    border-radius: 6px;
+    --mat-list-list-item-leading-icon-color: #{$ink-text-muted};
+  }
+
+  ::ng-deep .mat-mdc-list-item:hover {
+    background: $ink-elevated;
+  }
 }
 
 .active-link {
-  --mat-list-active-indicator-color: var(--mat-sys-primary-container);
+  ::ng-deep &.mat-mdc-list-item {
+    background: rgba($accent, 0.16);
+    color: #fff;
+    --mat-list-list-item-leading-icon-color: #{$accent};
+    --mat-list-active-indicator-color: transparent;
+  }
 }
 
 .content {
   padding: 24px;
+  background: var(--mat-sys-surface-container-lowest);
+  min-height: 100%;
 }
 
 .menu-user-info {

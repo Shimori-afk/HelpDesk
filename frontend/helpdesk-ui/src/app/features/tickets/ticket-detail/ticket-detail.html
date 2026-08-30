@@ -32,10 +32,12 @@
     <mat-card class="main-card">
       <mat-card-content>
         <div class="meta-row">
-          <span class="chip" [ngClass]="statusClass()">{{ t.status }}</span>
-          <span class="chip" [ngClass]="priorityClass()">{{ t.priority }}</span>
-          <span class="chip sla-chip" [ngClass]="slaClass()">
-            <span class="sla-dot"></span>{{ slaLabel(t.slaState) }}
+          <span class="badge" [ngClass]="statusClass()">
+            <span class="badge-dot"></span>{{ t.status }}
+          </span>
+          <span class="badge-text" [ngClass]="priorityClass()">{{ t.priority }}</span>
+          <span class="badge" [ngClass]="slaClass()">
+            <span class="badge-dot"></span>{{ slaLabel(t.slaState) }}
           </span>
           <span class="meta-item">{{ t.categoryName }}</span>
           @if (t.departmentName) {
@@ -57,11 +59,11 @@
           </div>
           <div>
             <span class="label">Created</span>
-            <span>{{ t.createdAt | date: 'medium' }}</span>
+            <span class="mono">{{ t.createdAt | date: 'medium' }}</span>
           </div>
           <div>
             <span class="label">Resolution due</span>
-            <span>{{ t.resolutionDueAt | date: 'medium' }}</span>
+            <span class="mono">{{ t.resolutionDueAt | date: 'medium' }}</span>
           </div>
         </div>
 
@@ -81,7 +83,7 @@
             <div class="comment">
               <div class="comment-header">
                 <strong>{{ comment.authorName }}</strong>
-                <span class="comment-date">{{ comment.createdAt | date: 'short' }}</span>
+                <span class="comment-date mono">{{ comment.createdAt | date: 'short' }}</span>
               </div>
               <p>{{ comment.message }}</p>
             </div>
@@ -190,7 +192,7 @@
         <div class="timeline">
           @for (activity of t.activities; track activity.id) {
             <div class="timeline-entry">
-              <div class="timeline-time">{{ activity.createdAt | date: 'short' }}</div>
+              <div class="timeline-time mono">{{ activity.createdAt | date: 'short' }}</div>
               <div class="timeline-text">
                 <strong>{{ activity.userName }}</strong>
                 <span>{{ activity.description ?? activity.type }}</span>

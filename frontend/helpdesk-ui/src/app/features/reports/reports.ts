@@ -7,23 +7,23 @@ import { Report as ReportApi } from '../../core/services/report';
 import { ReportsSummary } from '../../core/models/report.model';
 
 const STATUS_COLORS: Record<string, string> = {
-  Open: '#1976d2',
-  InProgress: '#f9a825',
-  WaitingForUser: '#8e24aa',
-  Escalated: '#c62828',
-  Resolved: '#2e7d32',
-  Closed: '#607d8b',
-  Reopened: '#ef6c00'
+  Open: '#3b82f6',
+  InProgress: '#d97706',
+  WaitingForUser: '#8b5cf6',
+  Escalated: '#e11d48',
+  Resolved: '#16a34a',
+  Closed: '#6b7280',
+  Reopened: '#ea580c'
 };
 
 const PRIORITY_COLORS: Record<string, string> = {
-  Low: '#2e7d32',
-  Medium: '#f9a825',
-  High: '#ef6c00',
-  Critical: '#c62828'
+  Low: '#16a34a',
+  Medium: '#d97706',
+  High: '#ea580c',
+  Critical: '#e11d48'
 };
 
-const PALETTE = ['#1976d2', '#2e7d32', '#f9a825', '#8e24aa', '#ef6c00', '#00897b', '#c62828', '#5e35b1'];
+const PALETTE = ['#8b7cf6', '#16a34a', '#d97706', '#3b82f6', '#e11d48', '#0891b2', '#8b5cf6', '#6b7280'];
 
 @Component({
   selector: 'app-reports',
@@ -45,8 +45,8 @@ export class Reports implements OnInit {
         {
           label: 'Tickets created',
           data: items.map((d) => d.count),
-          borderColor: '#1976d2',
-          backgroundColor: 'rgba(25, 118, 210, 0.15)',
+          borderColor: '#8b7cf6',
+          backgroundColor: 'rgba(139, 124, 246, 0.15)',
           fill: true,
           tension: 0.3
         }

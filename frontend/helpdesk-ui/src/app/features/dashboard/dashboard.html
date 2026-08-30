@@ -10,39 +10,39 @@
   <h2 class="section-title">Tickets by status</h2>
   <div class="stat-grid">
     <a class="stat-card status-open" [routerLink]="['/tickets']" [queryParams]="{ status: 'Open' }">
-      <mat-icon>inbox</mat-icon>
-      <span class="stat-value">{{ s.openCount }}</span>
+      <mat-icon class="stat-icon">inbox</mat-icon>
       <span class="stat-label">Open</span>
+      <span class="stat-value mono">{{ s.openCount }}</span>
     </a>
     <a class="stat-card status-inprogress" [routerLink]="['/tickets']" [queryParams]="{ status: 'InProgress' }">
-      <mat-icon>autorenew</mat-icon>
-      <span class="stat-value">{{ s.inProgressCount }}</span>
+      <mat-icon class="stat-icon">autorenew</mat-icon>
       <span class="stat-label">In Progress</span>
+      <span class="stat-value mono">{{ s.inProgressCount }}</span>
     </a>
     <a class="stat-card status-waitingforuser" [routerLink]="['/tickets']" [queryParams]="{ status: 'WaitingForUser' }">
-      <mat-icon>hourglass_empty</mat-icon>
-      <span class="stat-value">{{ s.waitingForUserCount }}</span>
+      <mat-icon class="stat-icon">hourglass_empty</mat-icon>
       <span class="stat-label">Waiting for User</span>
+      <span class="stat-value mono">{{ s.waitingForUserCount }}</span>
     </a>
     <a class="stat-card status-escalated" [routerLink]="['/tickets']" [queryParams]="{ status: 'Escalated' }">
-      <mat-icon>report</mat-icon>
-      <span class="stat-value">{{ s.escalatedCount }}</span>
+      <mat-icon class="stat-icon">report</mat-icon>
       <span class="stat-label">Escalated</span>
+      <span class="stat-value mono">{{ s.escalatedCount }}</span>
     </a>
     <a class="stat-card status-resolved" [routerLink]="['/tickets']" [queryParams]="{ status: 'Resolved' }">
-      <mat-icon>check_circle</mat-icon>
-      <span class="stat-value">{{ s.resolvedCount }}</span>
+      <mat-icon class="stat-icon">check_circle</mat-icon>
       <span class="stat-label">Resolved</span>
+      <span class="stat-value mono">{{ s.resolvedCount }}</span>
     </a>
     <a class="stat-card status-closed" [routerLink]="['/tickets']" [queryParams]="{ status: 'Closed' }">
-      <mat-icon>lock</mat-icon>
-      <span class="stat-value">{{ s.closedCount }}</span>
+      <mat-icon class="stat-icon">lock</mat-icon>
       <span class="stat-label">Closed</span>
+      <span class="stat-value mono">{{ s.closedCount }}</span>
     </a>
     <a class="stat-card status-reopened" [routerLink]="['/tickets']" [queryParams]="{ status: 'Reopened' }">
-      <mat-icon>replay</mat-icon>
-      <span class="stat-value">{{ s.reopenedCount }}</span>
+      <mat-icon class="stat-icon">replay</mat-icon>
       <span class="stat-label">Reopened</span>
+      <span class="stat-value mono">{{ s.reopenedCount }}</span>
     </a>
   </div>
 
@@ -50,28 +50,28 @@
     <h2 class="section-title">Agent overview</h2>
     <div class="stat-grid">
       <a
-        class="stat-card highlight-primary"
+        class="stat-card accent-primary"
         [routerLink]="['/tickets']"
         [queryParams]="{ assignedAgentId: auth.currentUser()?.id }"
       >
-        <mat-icon>person</mat-icon>
-        <span class="stat-value">{{ s.myAssignedCount }}</span>
+        <mat-icon class="stat-icon">person</mat-icon>
         <span class="stat-label">My Tickets</span>
+        <span class="stat-value mono">{{ s.myAssignedCount }}</span>
       </a>
-      <a class="stat-card highlight-neutral" [routerLink]="['/tickets']" [queryParams]="{ unassigned: true }">
-        <mat-icon>person_off</mat-icon>
-        <span class="stat-value">{{ s.unassignedCount }}</span>
+      <a class="stat-card accent-neutral" [routerLink]="['/tickets']" [queryParams]="{ unassigned: true }">
+        <mat-icon class="stat-icon">person_off</mat-icon>
         <span class="stat-label">Unassigned</span>
+        <span class="stat-value mono">{{ s.unassignedCount }}</span>
       </a>
-      <a class="stat-card highlight-warn" [routerLink]="['/tickets']" [queryParams]="{ overdue: true }">
-        <mat-icon>schedule</mat-icon>
-        <span class="stat-value">{{ s.overdueCount }}</span>
+      <a class="stat-card accent-warn" [routerLink]="['/tickets']" [queryParams]="{ overdue: true }">
+        <mat-icon class="stat-icon">schedule</mat-icon>
         <span class="stat-label">Overdue</span>
+        <span class="stat-value mono">{{ s.overdueCount }}</span>
       </a>
-      <a class="stat-card highlight-critical" [routerLink]="['/tickets']" [queryParams]="{ priority: 'Critical' }">
-        <mat-icon>priority_high</mat-icon>
-        <span class="stat-value">{{ s.criticalOpenCount }}</span>
+      <a class="stat-card accent-critical" [routerLink]="['/tickets']" [queryParams]="{ priority: 'Critical' }">
+        <mat-icon class="stat-icon">priority_high</mat-icon>
         <span class="stat-label">Critical</span>
+        <span class="stat-value mono">{{ s.criticalOpenCount }}</span>
       </a>
     </div>
   }

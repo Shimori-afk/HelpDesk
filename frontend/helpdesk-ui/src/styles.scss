@@ -10,10 +10,13 @@ html {
   @include mat.theme(
     (
       color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
+        primary: mat.$violet-palette,
+        tertiary: mat.$cyan-palette,
       ),
-      typography: Roboto,
+      typography: (
+        plain-family: 'Manrope',
+        brand-family: 'Manrope',
+      ),
       density: 0,
     )
   );
@@ -36,4 +39,90 @@ body {
   margin: 0;
   height: 100%;
 }
-/* You can add global styles to this file, and also import other style files */
+
+// Numeric/technical data (ticket IDs, timestamps, counts) reads better in a
+// monospace face — it's a small detail but it's the difference between a
+// hand-built tool and a generic template.
+.mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+// Shared status/priority/SLA indicator: a small colored dot plus a neutral
+// badge, rather than a different pastel background per state. Used across
+// the ticket list, ticket detail, and dashboard so the vocabulary of color
+// stays consistent everywhere it appears.
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px 3px 8px;
+  border-radius: 5px;
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+// Status palette — used as a badge-dot color and, where a status needs to
+// stand out on its own (no neutral badge wrapper), as text color via the
+// matching -text class.
+$status-colors: (
+  open: #3b82f6,
+  inprogress: #d97706,
+  waitingforuser: #8b5cf6,
+  escalated: #e11d48,
+  resolved: #16a34a,
+  closed: #6b7280,
+  reopened: #ea580c
+);
+
+$priority-colors: (
+  low: #16a34a,
+  medium: #d97706,
+  high: #ea580c,
+  critical: #e11d48
+);
+
+$sla-colors: (
+  withinsla: #16a34a,
+  approachingbreach: #d97706,
+  breached: #e11d48
+);
+
+// Each -dot rule is emitted twice: once for a dot nested inside a wrapper
+// carrying the state class (.status-open .badge-dot) and once for a bare
+// dot that carries the state class itself (.status-open.badge-dot) — both
+// compositions are used across the ticket list/detail views.
+@each $name, $color in $status-colors {
+  .status-#{$name} .badge-dot,
+  .status-#{$name}.badge-dot {
+    background: $color;
+  }
+}
+
+@each $name, $color in $priority-colors {
+  .priority-#{$name} .badge-dot,
+  .priority-#{$name}.badge-dot {
+    background: $color;
+  }
+  .priority-#{$name}.badge-text {
+    color: $color;
+  }
+}
+
+@each $name, $color in $sla-colors {
+  .sla-#{$name} .badge-dot,
+  .sla-#{$name}.badge-dot {
+    background: $color;
+  }
+}

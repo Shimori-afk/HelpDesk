@@ -1,5 +1,11 @@
-<mat-toolbar color="primary" class="topbar">
-  <span class="brand">HelpDesk</span>
+<mat-toolbar class="topbar">
+  <span class="brand">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+      <rect width="32" height="32" rx="7" fill="#8b7cf6" />
+      <path d="M9 8v16M23 8v16M9 16h14" stroke="#171923" stroke-width="3" stroke-linecap="round" />
+    </svg>
+    HelpDesk
+  </span>
   <span class="spacer"></span>
 
   <button mat-icon-button [matMenuTriggerFor]="notificationMenu" aria-label="Notifications">

@@ -9,11 +9,11 @@
 } @else if (summary(); as s) {
   <div class="kpi-grid">
     <mat-card class="kpi-card">
-      <span class="kpi-value">{{ formatResolutionTime(s.averageResolutionHours) }}</span>
+      <span class="kpi-value mono">{{ formatResolutionTime(s.averageResolutionHours) }}</span>
       <span class="kpi-label">Average resolution time</span>
     </mat-card>
     <mat-card class="kpi-card">
-      <span class="kpi-value">{{ s.slaComplianceRate }}%</span>
+      <span class="kpi-value mono">{{ s.slaComplianceRate }}%</span>
       <span class="kpi-label">SLA compliance rate</span>
     </mat-card>
   </div>
