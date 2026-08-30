@@ -1,6 +1,32 @@
 <mat-toolbar color="primary" class="topbar">
   <span class="brand">HelpDesk</span>
   <span class="spacer"></span>
+
+  <button mat-icon-button [matMenuTriggerFor]="notificationMenu" aria-label="Notifications">
+    <mat-icon [matBadge]="unreadCount() || null" matBadgeColor="warn" matBadgeSize="small">
+      notifications
+    </mat-icon>
+  </button>
+  <mat-menu #notificationMenu="matMenu" class="notification-menu">
+    <div class="notification-header" (click)="$event.stopPropagation()">
+      <span>Notifications</span>
+      @if (unreadCount() > 0) {
+        <button mat-button (click)="markAllRead()">Mark all read</button>
+      }
+    </div>
+    @if (notifications().length === 0) {
+      <div class="notification-empty">No notifications yet.</div>
+    }
+    @for (notification of notifications(); track notification.id) {
+      <button mat-menu-item [class.unread]="!notification.isRead" (click)="openNotification(notification)">
+        <div class="notification-item">
+          <span class="notification-message">{{ notification.message }}</span>
+          <span class="notification-date">{{ notification.createdAt | date: 'short' }}</span>
+        </div>
+      </button>
+    }
+  </mat-menu>
+
   <button mat-icon-button [matMenuTriggerFor]="userMenu" aria-label="Account menu">
     <mat-icon>account_circle</mat-icon>
   </button>

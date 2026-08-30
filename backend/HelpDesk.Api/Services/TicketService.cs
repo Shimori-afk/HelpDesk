@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HelpDesk.Api.Services;
 
-public class TicketService(ApplicationDbContext db, ICurrentUserService currentUser) : ITicketService
+public class TicketService(ApplicationDbContext db, ICurrentUserService currentUser, INotificationDispatcher notifier) : ITicketService
 {
     public async Task<PagedResult<TicketListItemDto>> GetTicketsAsync(TicketQueryParameters query)
     {
@@ -122,7 +122,9 @@ public class TicketService(ApplicationDbContext db, ICurrentUserService currentU
         await db.SaveChangesAsync();
 
         var loaded = await LoadTicketForDetailAsync(ticket.Id);
-        return ToDetailDto(loaded);
+        var loadedDto = ToDetailDto(loaded);
+        await notifier.BroadcastTicketCreatedAsync(loadedDto);
+        return loadedDto;
     }
 
     public async Task<TicketDetailDto> UpdateTicketAsync(int id, UpdateTicketDto dto)
@@ -195,23 +197,12 @@ public class TicketService(ApplicationDbContext db, ICurrentUserService currentU
             CreatedAt = now
         });
 
-        var recipientIds = new HashSet<int> { ticket.CreatedById };
-        if (ticket.AssignedAgentId is not null) recipientIds.Add(ticket.AssignedAgentId.Value);
-        recipientIds.Remove(currentUser.UserId);
-
-        foreach (var recipientId in recipientIds)
-        {
-            db.Notifications.Add(new Notification
-            {
-                UserId = recipientId,
-                TicketId = ticketId,
-                Message = $"New comment on ticket \"{ticket.Title}\"",
-                Type = NotificationType.CommentAdded,
-                CreatedAt = now
-            });
-        }
-
         await db.SaveChangesAsync();
+
+        foreach (var recipientId in RecipientsFor(ticket))
+        {
+            await notifier.NotifyUserAsync(recipientId, ticketId, $"New comment on ticket \"{ticket.Title}\"", NotificationType.CommentAdded, now);
+        }
 
         var author = await db.Users.FindAsync(currentUser.UserId);
         return new TicketCommentDto(comment.Id, comment.AuthorId, author?.Name ?? "Unknown", comment.Message, comment.CreatedAt);
@@ -275,9 +266,12 @@ public class TicketService(ApplicationDbContext db, ICurrentUserService currentU
             CreatedAt = now
         });
 
-        AddNotification(ticket, $"Ticket \"{ticket.Title}\" status changed to {status}", NotificationType.StatusChanged, now);
-
         await db.SaveChangesAsync();
+
+        foreach (var recipientId in RecipientsFor(ticket))
+        {
+            await notifier.NotifyUserAsync(recipientId, ticketId, $"Ticket \"{ticket.Title}\" status changed to {status}", NotificationType.StatusChanged, now);
+        }
 
         var reloaded = await LoadTicketForDetailAsync(ticketId);
         return ToDetailDto(reloaded);
@@ -338,19 +332,12 @@ public class TicketService(ApplicationDbContext db, ICurrentUserService currentU
             });
         }
 
+        await db.SaveChangesAsync();
+
         if (agent is not null && agent.Id != currentUser.UserId)
         {
-            db.Notifications.Add(new Notification
-            {
-                UserId = agent.Id,
-                TicketId = ticketId,
-                Message = $"You were assigned to ticket \"{ticket.Title}\"",
-                Type = NotificationType.TicketAssigned,
-                CreatedAt = now
-            });
+            await notifier.NotifyUserAsync(agent.Id, ticketId, $"You were assigned to ticket \"{ticket.Title}\"", NotificationType.TicketAssigned, now);
         }
-
-        await db.SaveChangesAsync();
 
         var reloaded = await LoadTicketForDetailAsync(ticketId);
         return ToDetailDto(reloaded);
@@ -386,12 +373,15 @@ public class TicketService(ApplicationDbContext db, ICurrentUserService currentU
             CreatedAt = now
         });
 
-        AddNotification(ticket, $"Ticket \"{ticket.Title}\" priority changed to {priority}", NotificationType.PriorityChanged, now);
-
         var shouldAutoEscalate = priority == TicketPriority.Critical
             && TicketLifecycle.CanTransition(ticket.Status, TicketStatus.Escalated);
 
         await db.SaveChangesAsync();
+
+        foreach (var recipientId in RecipientsFor(ticket))
+        {
+            await notifier.NotifyUserAsync(recipientId, ticketId, $"Ticket \"{ticket.Title}\" priority changed to {priority}", NotificationType.PriorityChanged, now);
+        }
 
         if (shouldAutoEscalate)
         {
@@ -432,6 +422,8 @@ public class TicketService(ApplicationDbContext db, ICurrentUserService currentU
             CreatedAt = now
         });
 
+        await db.SaveChangesAsync();
+
         var recipientIds = new HashSet<int>();
         if (ticket.AssignedAgentId is not null) recipientIds.Add(ticket.AssignedAgentId.Value);
         var adminIds = await db.Users.Where(u => u.Role == UserRole.Admin).Select(u => u.Id).ToListAsync();
@@ -440,39 +432,19 @@ public class TicketService(ApplicationDbContext db, ICurrentUserService currentU
 
         foreach (var recipientId in recipientIds)
         {
-            db.Notifications.Add(new Notification
-            {
-                UserId = recipientId,
-                TicketId = ticketId,
-                Message = $"Ticket \"{ticket.Title}\" was escalated",
-                Type = NotificationType.TicketEscalated,
-                CreatedAt = now
-            });
+            await notifier.NotifyUserAsync(recipientId, ticketId, $"Ticket \"{ticket.Title}\" was escalated", NotificationType.TicketEscalated, now);
         }
-
-        await db.SaveChangesAsync();
 
         var reloaded = await LoadTicketForDetailAsync(ticketId);
         return ToDetailDto(reloaded);
     }
 
-    private void AddNotification(Ticket ticket, string message, NotificationType type, DateTimeOffset now)
+    private HashSet<int> RecipientsFor(Ticket ticket)
     {
         var recipientIds = new HashSet<int> { ticket.CreatedById };
         if (ticket.AssignedAgentId is not null) recipientIds.Add(ticket.AssignedAgentId.Value);
         recipientIds.Remove(currentUser.UserId);
-
-        foreach (var recipientId in recipientIds)
-        {
-            db.Notifications.Add(new Notification
-            {
-                UserId = recipientId,
-                TicketId = ticket.Id,
-                Message = message,
-                Type = type,
-                CreatedAt = now
-            });
-        }
+        return recipientIds;
     }
 
     private async Task<Ticket> LoadTicketForDetailAsync(int id)

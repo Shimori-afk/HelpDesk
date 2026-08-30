@@ -2,6 +2,7 @@ using System.Text;
 using FluentValidation;
 using HelpDesk.Api.Common;
 using HelpDesk.Api.Data;
+using HelpDesk.Api.Hubs;
 using HelpDesk.Api.Middleware;
 using HelpDesk.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -66,15 +67,35 @@ builder.Services
             ValidateLifetime = true,
             ClockSkew = TimeSpan.FromSeconds(30)
         };
+
+        // SignalR's browser client can't set an Authorization header on the
+        // WebSocket handshake, so it sends the token as a query string param
+        // instead; accept that for requests targeting our hub.
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                if (!string.IsNullOrEmpty(accessToken) && context.HttpContext.Request.Path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddSignalR()
+    .AddJsonProtocol(options =>
+        options.PayloadSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter()));
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 const string AngularClientPolicy = "AngularClient";
@@ -111,6 +132,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 using (var scope = app.Services.CreateScope())
 {
