@@ -1,0 +1,67 @@
+# HelpDesk
+
+A full-stack internal IT support ticketing system built with Angular, ASP.NET Core, and PostgreSQL.
+
+> Work in progress — being built incrementally, phase by phase. This README will grow as features land.
+
+## Technology Stack
+
+- **Frontend:** Angular 22 (standalone, zoneless), Angular Material, SignalR client
+- **Backend:** ASP.NET Core 10 Web API, Entity Framework Core, JWT auth, SignalR
+- **Database:** PostgreSQL 17
+- **Infrastructure:** Docker Compose
+
+## Project Structure
+
+```
+helper/
+├── backend/HelpDesk.Api/     ASP.NET Core Web API
+├── frontend/helpdesk-ui/     Angular application
+└── docker-compose.yml
+```
+
+## Running Locally
+
+### Prerequisites
+- .NET 10 SDK
+- Node.js 24+
+- Docker Desktop
+
+### With Docker
+
+```bash
+cp .env.example .env   # adjust values as needed
+docker compose up --build
+```
+
+- Frontend: http://localhost:4200
+- Backend API: http://localhost:8080
+- Swagger UI: http://localhost:8080/swagger
+
+### Without Docker (dev mode)
+
+Backend:
+```bash
+cd backend/HelpDesk.Api
+dotnet run
+```
+
+Frontend:
+```bash
+cd frontend/helpdesk-ui
+npm install
+npm start
+```
+
+## Status
+
+- [x] Phase 1 — Project setup (Angular, ASP.NET Core, PostgreSQL, Docker, EF Core, Swagger)
+- [ ] Phase 2 — Database schema & seed data
+- [ ] Phase 3 — Authentication & authorization
+- [ ] Phase 4 — Ticket system
+- [ ] Phase 5 — Agent functionality
+- [ ] Phase 6 — SignalR real-time updates
+- [ ] Phase 7 — SLA monitoring & background service
+- [ ] Phase 8 — Dashboard
+- [ ] Phase 9 — Reports
+- [ ] Phase 10 — Testing, Docker hardening, final README

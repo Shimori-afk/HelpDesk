@@ -1,0 +1,25 @@
+# Environment
+.env
+*.env
+!.env.example
+
+# .NET
+backend/**/bin/
+backend/**/obj/
+backend/**/*.user
+backend/**/.vs/
+
+# Node / Angular
+frontend/**/node_modules/
+frontend/**/dist/
+frontend/**/.angular/
+frontend/**/npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
