@@ -53,10 +53,21 @@ npm install
 npm start
 ```
 
+## Test Credentials
+
+Seeded automatically on first run (password for all: `Password123!`):
+
+| Email | Role |
+|---|---|
+| admin@example.com | Admin |
+| agent1@example.com | Agent |
+| agent2@example.com | Agent |
+| employee@example.com | Employee |
+
 ## Status
 
 - [x] Phase 1 — Project setup (Angular, ASP.NET Core, PostgreSQL, Docker, EF Core, Swagger)
-- [ ] Phase 2 — Database schema & seed data
+- [x] Phase 2 — Database schema & seed data
 - [ ] Phase 3 — Authentication & authorization
 - [ ] Phase 4 — Ticket system
 - [ ] Phase 5 — Agent functionality
