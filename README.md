@@ -43,8 +43,11 @@ docker compose up --build
 Backend:
 ```bash
 cd backend/HelpDesk.Api
+dotnet user-secrets set "Jwt:Secret" "<a-long-random-string-at-least-32-chars>"
 dotnet run
 ```
+
+The JWT signing key is deliberately kept out of `appsettings.json` — set it via `dotnet user-secrets` locally (as above) or the `JWT_SECRET` value in `.env` when running through Docker.
 
 Frontend:
 ```bash
@@ -68,7 +71,7 @@ Seeded automatically on first run (password for all: `Password123!`):
 
 - [x] Phase 1 — Project setup (Angular, ASP.NET Core, PostgreSQL, Docker, EF Core, Swagger)
 - [x] Phase 2 — Database schema & seed data
-- [ ] Phase 3 — Authentication & authorization
+- [x] Phase 3 — Authentication & authorization
 - [ ] Phase 4 — Ticket system
 - [ ] Phase 5 — Agent functionality
 - [ ] Phase 6 — SignalR real-time updates

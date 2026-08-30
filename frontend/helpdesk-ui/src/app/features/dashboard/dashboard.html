@@ -1,0 +1,10 @@
+<mat-toolbar color="primary">
+  <span>HelpDesk</span>
+  <span class="spacer"></span>
+  <span class="user-name">{{ auth.currentUser()?.name }} ({{ auth.currentUser()?.role }})</span>
+  <button mat-button (click)="logout()">Logout</button>
+</mat-toolbar>
+
+<div class="dashboard-placeholder">
+  <p>Welcome, {{ auth.currentUser()?.name }}. The full dashboard lands in a later phase.</p>
+</div>
