@@ -1,0 +1,119 @@
+<div class="page-header">
+  <h1>Tickets</h1>
+  <a mat-flat-button color="primary" routerLink="/tickets/new">
+    <mat-icon>add</mat-icon>
+    New Ticket
+  </a>
+</div>
+
+<div class="filters">
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Search</mat-label>
+    <input
+      matInput
+      [ngModel]="search"
+      (ngModelChange)="onSearchChange($event)"
+      placeholder="Title, description, requester..."
+    />
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Status</mat-label>
+    <mat-select [(ngModel)]="statusFilter" (selectionChange)="onFilterChange()">
+      <mat-option value="">All</mat-option>
+      @for (status of statuses; track status) {
+        <mat-option [value]="status">{{ status }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Priority</mat-label>
+    <mat-select [(ngModel)]="priorityFilter" (selectionChange)="onFilterChange()">
+      <mat-option value="">All</mat-option>
+      @for (priority of priorities; track priority) {
+        <mat-option [value]="priority">{{ priority }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</div>
+
+<div class="table-container">
+  @if (loading()) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="36" />
+    </div>
+  }
+
+  @if (!loading() && tickets().length === 0) {
+    <div class="empty-state">
+      <mat-icon>inbox</mat-icon>
+      <p>No tickets found.</p>
+    </div>
+  } @else {
+    <table mat-table [dataSource]="tickets()">
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef>ID</th>
+        <td mat-cell *matCellDef="let t">#{{ t.id }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="title">
+        <th mat-header-cell *matHeaderCellDef>Title</th>
+        <td mat-cell *matCellDef="let t">
+          <a [routerLink]="['/tickets', t.id]">{{ t.title }}</a>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="requester">
+        <th mat-header-cell *matHeaderCellDef>Requester</th>
+        <td mat-cell *matCellDef="let t">{{ t.requesterName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="category">
+        <th mat-header-cell *matHeaderCellDef>Category</th>
+        <td mat-cell *matCellDef="let t">{{ t.categoryName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="priority">
+        <th mat-header-cell *matHeaderCellDef>Priority</th>
+        <td mat-cell *matCellDef="let t">
+          <span class="chip" [ngClass]="priorityClass(t.priority)">{{ t.priority }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef>Status</th>
+        <td mat-cell *matCellDef="let t">
+          <span class="chip" [ngClass]="statusClass(t.status)">{{ t.status }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="assignedAgent">
+        <th mat-header-cell *matHeaderCellDef>Assigned Agent</th>
+        <td mat-cell *matCellDef="let t">{{ t.assignedAgentName ?? 'Unassigned' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="createdAt">
+        <th mat-header-cell *matHeaderCellDef>Created</th>
+        <td mat-cell *matCellDef="let t">{{ t.createdAt | date: 'short' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="sla">
+        <th mat-header-cell *matHeaderCellDef>Resolution Due</th>
+        <td mat-cell *matCellDef="let t">{{ t.resolutionDueAt | date: 'short' }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+
+    <mat-paginator
+      [length]="totalCount()"
+      [pageSize]="pageSize"
+      [pageIndex]="page"
+      [pageSizeOptions]="[10, 20, 50]"
+      (page)="onPageChange($event)"
+    />
+  }
+</div>

@@ -72,7 +72,7 @@ Seeded automatically on first run (password for all: `Password123!`):
 - [x] Phase 1 — Project setup (Angular, ASP.NET Core, PostgreSQL, Docker, EF Core, Swagger)
 - [x] Phase 2 — Database schema & seed data
 - [x] Phase 3 — Authentication & authorization
-- [ ] Phase 4 — Ticket system
+- [x] Phase 4 — Ticket system
 - [ ] Phase 5 — Agent functionality
 - [ ] Phase 6 — SignalR real-time updates
 - [ ] Phase 7 — SLA monitoring & background service

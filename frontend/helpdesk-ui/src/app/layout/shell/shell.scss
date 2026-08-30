@@ -1,0 +1,48 @@
+:host {
+  display: block;
+  height: 100vh;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.shell-container {
+  height: calc(100vh - 64px);
+}
+
+.sidenav {
+  width: 220px;
+}
+
+.active-link {
+  --mat-list-active-indicator-color: var(--mat-sys-primary-container);
+}
+
+.content {
+  padding: 24px;
+}
+
+.menu-user-info {
+  padding: 8px 16px 4px;
+}
+
+.menu-user-name {
+  font-weight: 600;
+}
+
+.menu-user-role {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}

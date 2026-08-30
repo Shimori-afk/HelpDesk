@@ -1,0 +1,126 @@
+@if (loading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="36" />
+  </div>
+} @else if (notFound()) {
+  <div class="empty-state">
+    <mat-icon>error_outline</mat-icon>
+    <p>This ticket doesn't exist or you don't have access to it.</p>
+    <a mat-button routerLink="/tickets">Back to tickets</a>
+  </div>
+} @else if (ticket(); as t) {
+  <div class="page-header">
+    <a mat-icon-button routerLink="/tickets" aria-label="Back to tickets">
+      <mat-icon>arrow_back</mat-icon>
+    </a>
+    <h1>#{{ t.id }} {{ t.title }}</h1>
+    @if (canEdit()) {
+      <a mat-stroked-button [routerLink]="['/tickets', t.id, 'edit']">
+        <mat-icon>edit</mat-icon>
+        Edit
+      </a>
+    }
+  </div>
+
+  <div class="detail-grid">
+    <mat-card class="main-card">
+      <mat-card-content>
+        <div class="meta-row">
+          <span class="chip" [ngClass]="statusClass()">{{ t.status }}</span>
+          <span class="chip" [ngClass]="priorityClass()">{{ t.priority }}</span>
+          <span class="meta-item">{{ t.categoryName }}</span>
+          @if (t.departmentName) {
+            <span class="meta-item">{{ t.departmentName }}</span>
+          }
+          @if (t.location) {
+            <span class="meta-item">{{ t.location }}</span>
+          }
+        </div>
+
+        <div class="people-row">
+          <div>
+            <span class="label">Created by</span>
+            <span>{{ t.requesterName }}</span>
+          </div>
+          <div>
+            <span class="label">Assigned to</span>
+            <span>{{ t.assignedAgentName ?? 'Unassigned' }}</span>
+          </div>
+          <div>
+            <span class="label">Created</span>
+            <span>{{ t.createdAt | date: 'medium' }}</span>
+          </div>
+        </div>
+
+        <mat-divider />
+
+        <h3>Description</h3>
+        <p class="description">{{ t.description }}</p>
+
+        <mat-divider />
+
+        <h3>Comments</h3>
+        @if (t.comments.length === 0) {
+          <p class="empty-hint">No comments yet.</p>
+        }
+        <div class="comments">
+          @for (comment of t.comments; track comment.id) {
+            <div class="comment">
+              <div class="comment-header">
+                <strong>{{ comment.authorName }}</strong>
+                <span class="comment-date">{{ comment.createdAt | date: 'short' }}</span>
+              </div>
+              <p>{{ comment.message }}</p>
+            </div>
+          }
+        </div>
+
+        <div class="add-comment">
+          <mat-form-field appearance="outline" class="comment-field">
+            <mat-label>Add a comment</mat-label>
+            <textarea
+              matInput
+              rows="3"
+              [ngModel]="newComment()"
+              (ngModelChange)="newComment.set($event)"
+            ></textarea>
+          </mat-form-field>
+          <button
+            mat-flat-button
+            color="primary"
+            (click)="submitComment()"
+            [disabled]="postingComment() || !newComment().trim()"
+          >
+            @if (postingComment()) {
+              <mat-spinner diameter="18" />
+            } @else {
+              Add Comment
+            }
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="timeline-card">
+      <mat-card-header>
+        <mat-card-title>Timeline</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="timeline">
+          @for (activity of t.activities; track activity.id) {
+            <div class="timeline-entry">
+              <div class="timeline-time">{{ activity.createdAt | date: 'short' }}</div>
+              <div class="timeline-text">
+                <strong>{{ activity.userName }}</strong>
+                <span>{{ activity.description ?? activity.type }}</span>
+                @if (activity.oldValue && activity.newValue) {
+                  <span class="timeline-change">{{ activity.oldValue }} → {{ activity.newValue }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+}
