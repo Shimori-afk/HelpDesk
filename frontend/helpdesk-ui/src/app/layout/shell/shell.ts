@@ -1,5 +1,8 @@
 import { Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { map } from 'rxjs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
@@ -13,6 +16,8 @@ import { Auth } from '../../core/services/auth';
 import { Signalr } from '../../core/services/signalr';
 import { Notification as NotificationApi } from '../../core/services/notification';
 import { AppNotification } from '../../core/models/notification.model';
+
+const MOBILE_BREAKPOINT = '(max-width: 768px)';
 
 @Component({
   selector: 'app-shell',
@@ -38,6 +43,14 @@ export class Shell implements OnInit, OnDestroy {
   private readonly signalr = inject(Signalr);
   private readonly notificationApi = inject(NotificationApi);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly breakpointObserver = inject(BreakpointObserver);
+
+  protected readonly isMobile = toSignal(
+    this.breakpointObserver.observe(MOBILE_BREAKPOINT).pipe(map((state) => state.matches)),
+    { initialValue: false }
+  );
+
+  protected readonly sidenavOpened = signal(true);
 
   private readonly allNavItems = [
     { label: 'Dashboard', icon: 'dashboard', path: '/dashboard' },
@@ -54,6 +67,10 @@ export class Shell implements OnInit, OnDestroy {
   protected readonly unreadCount = signal(0);
 
   constructor() {
+    effect(() => {
+      this.sidenavOpened.set(!this.isMobile());
+    });
+
     effect(() => {
       const incoming = this.signalr.notificationReceived();
       if (incoming) {
@@ -85,6 +102,16 @@ export class Shell implements OnInit, OnDestroy {
   logout(): void {
     this.auth.logout();
     this.router.navigateByUrl('/login');
+  }
+
+  protected toggleSidenav(): void {
+    this.sidenavOpened.update((opened) => !opened);
+  }
+
+  protected closeSidenavIfMobile(): void {
+    if (this.isMobile()) {
+      this.sidenavOpened.set(false);
+    }
   }
 
   protected openNotification(notification: AppNotification): void {

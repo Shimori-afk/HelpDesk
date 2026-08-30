@@ -1,4 +1,9 @@
 <mat-toolbar class="topbar">
+  @if (isMobile()) {
+    <button mat-icon-button (click)="toggleSidenav()" aria-label="Toggle menu">
+      <mat-icon>menu</mat-icon>
+    </button>
+  }
   <span class="brand">
     <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
       <rect width="32" height="32" rx="7" fill="#8b7cf6" />
@@ -49,10 +54,15 @@
 </mat-toolbar>
 
 <mat-sidenav-container class="shell-container">
-  <mat-sidenav mode="side" opened class="sidenav">
+  <mat-sidenav
+    [mode]="isMobile() ? 'over' : 'side'"
+    [opened]="sidenavOpened()"
+    (openedChange)="sidenavOpened.set($event)"
+    class="sidenav"
+  >
     <mat-nav-list>
       @for (item of navItems(); track item.path) {
-        <a mat-list-item [routerLink]="item.path" routerLinkActive="active-link">
+        <a mat-list-item [routerLink]="item.path" routerLinkActive="active-link" (click)="closeSidenavIfMobile()">
           <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
           <span matListItemTitle>{{ item.label }}</span>
         </a>

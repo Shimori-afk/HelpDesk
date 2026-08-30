@@ -54,6 +54,10 @@ $accent: #8b7cf6;
     margin: 2px 8px;
     border-radius: 6px;
     --mat-list-list-item-leading-icon-color: #{$ink-text-muted};
+    --mat-list-list-item-label-text-color: #d4d5dd;
+    --mat-list-list-item-hover-label-text-color: #fff;
+    --mat-list-list-item-hover-leading-icon-color: #fff;
+    --mat-list-list-item-focus-label-text-color: #fff;
   }
 
   ::ng-deep .mat-mdc-list-item:hover {
@@ -66,6 +70,7 @@ $accent: #8b7cf6;
     background: rgba($accent, 0.16);
     color: #fff;
     --mat-list-list-item-leading-icon-color: #{$accent};
+    --mat-list-list-item-label-text-color: #fff;
     --mat-list-active-indicator-color: transparent;
   }
 }
@@ -74,6 +79,10 @@ $accent: #8b7cf6;
   padding: 24px;
   background: var(--mat-sys-surface-container-lowest);
   min-height: 100%;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
 }
 
 .menu-user-info {
