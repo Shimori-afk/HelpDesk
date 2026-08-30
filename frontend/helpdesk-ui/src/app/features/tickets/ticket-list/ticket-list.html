@@ -51,6 +51,16 @@
       }
     </mat-select>
   </mat-form-field>
+  @if (overdueOnly) {
+    <mat-chip-set>
+      <mat-chip (removed)="clearOverdueFilter()" highlighted color="warn">
+        Overdue only
+        <button matChipRemove aria-label="Clear overdue filter">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-chip>
+    </mat-chip-set>
+  }
 </div>
 
 <div class="table-container">

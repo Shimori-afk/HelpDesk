@@ -39,6 +39,11 @@ public class TicketService(ApplicationDbContext db, ICurrentUserService currentU
         if (query.DepartmentId is not null) tickets = tickets.Where(t => t.DepartmentId == query.DepartmentId);
         if (query.AssignedAgentId is not null) tickets = tickets.Where(t => t.AssignedAgentId == query.AssignedAgentId);
         if (query.Unassigned == true) tickets = tickets.Where(t => t.AssignedAgentId == null);
+        if (query.Overdue == true)
+        {
+            var overdueCutoff = DateTimeOffset.UtcNow;
+            tickets = tickets.Where(t => t.ResolutionDueAt < overdueCutoff && t.Status != TicketStatus.Resolved && t.Status != TicketStatus.Closed);
+        }
         if (query.CreatedFrom is not null) tickets = tickets.Where(t => t.CreatedAt >= query.CreatedFrom);
         if (query.CreatedTo is not null) tickets = tickets.Where(t => t.CreatedAt <= query.CreatedTo);
 
@@ -50,6 +55,8 @@ public class TicketService(ApplicationDbContext db, ICurrentUserService currentU
             ("status", false) => tickets.OrderBy(t => t.Status),
             ("title", true) => tickets.OrderByDescending(t => t.Title),
             ("title", false) => tickets.OrderBy(t => t.Title),
+            ("resolutiondueat", true) => tickets.OrderByDescending(t => t.ResolutionDueAt),
+            ("resolutiondueat", false) => tickets.OrderBy(t => t.ResolutionDueAt),
             (_, false) => tickets.OrderBy(t => t.CreatedAt),
             _ => tickets.OrderByDescending(t => t.CreatedAt)
         };

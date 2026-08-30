@@ -11,6 +11,7 @@ public class TicketQueryParameters
     public int? DepartmentId { get; set; }
     public int? AssignedAgentId { get; set; }
     public bool? Unassigned { get; set; }
+    public bool? Overdue { get; set; }
     public DateTimeOffset? CreatedFrom { get; set; }
     public DateTimeOffset? CreatedTo { get; set; }
 

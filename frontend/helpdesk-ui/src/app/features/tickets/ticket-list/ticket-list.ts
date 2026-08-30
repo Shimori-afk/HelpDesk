@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -41,6 +41,7 @@ const PRIORITIES: TicketPriority[] = ['Low', 'Medium', 'High', 'Critical'];
 })
 export class TicketList implements OnInit {
   private readonly ticketApi = inject(TicketApi);
+  private readonly route = inject(ActivatedRoute);
   protected readonly auth = inject(Auth);
   private readonly searchInput$ = new Subject<string>();
 
@@ -60,13 +61,36 @@ export class TicketList implements OnInit {
   protected quickFilter: 'all' | 'mine' | 'unassigned' = 'all';
   protected page = 0;
   protected pageSize = 20;
+  protected overdueOnly = false;
 
   ngOnInit(): void {
+    this.applyInitialFiltersFromRoute();
+
     this.searchInput$.pipe(debounceTime(300), distinctUntilChanged()).subscribe(() => {
       this.page = 0;
       this.load();
     });
     this.load();
+  }
+
+  private applyInitialFiltersFromRoute(): void {
+    const params = this.route.snapshot.queryParamMap;
+    const status = params.get('status');
+    const priority = params.get('priority');
+    const assignedAgentId = params.get('assignedAgentId');
+
+    if (status && (this.statuses as string[]).includes(status)) {
+      this.statusFilter = status as TicketStatus;
+    }
+    if (priority && (this.priorities as string[]).includes(priority)) {
+      this.priorityFilter = priority as TicketPriority;
+    }
+    if (params.get('unassigned') === 'true') {
+      this.quickFilter = 'unassigned';
+    } else if (assignedAgentId && Number(assignedAgentId) === this.auth.currentUser()?.id) {
+      this.quickFilter = 'mine';
+    }
+    this.overdueOnly = params.get('overdue') === 'true';
   }
 
   onSearchChange(value: string): void {
@@ -75,6 +99,12 @@ export class TicketList implements OnInit {
   }
 
   onFilterChange(): void {
+    this.page = 0;
+    this.load();
+  }
+
+  clearOverdueFilter(): void {
+    this.overdueOnly = false;
     this.page = 0;
     this.load();
   }
@@ -122,6 +152,7 @@ export class TicketList implements OnInit {
       priority: this.priorityFilter || undefined,
       assignedAgentId: this.quickFilter === 'mine' ? this.auth.currentUser()?.id : undefined,
       unassigned: this.quickFilter === 'unassigned' ? true : undefined,
+      overdue: this.overdueOnly || undefined,
       page: this.page + 1,
       pageSize: this.pageSize
     };

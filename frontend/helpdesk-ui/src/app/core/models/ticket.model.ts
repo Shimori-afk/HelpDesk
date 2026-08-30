@@ -120,6 +120,7 @@ export interface TicketQuery {
   departmentId?: number;
   assignedAgentId?: number;
   unassigned?: boolean;
+  overdue?: boolean;
   sortBy?: string;
   sortDescending?: boolean;
   page?: number;

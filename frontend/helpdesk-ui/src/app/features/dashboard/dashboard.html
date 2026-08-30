@@ -1,2 +1,78 @@
-<h1>Welcome, {{ auth.currentUser()?.name }}</h1>
-<p>The full statistics dashboard lands in a later phase. Use the sidebar to view or create tickets.</p>
+<div class="page-header">
+  <h1>Welcome, {{ auth.currentUser()?.name }}</h1>
+</div>
+
+@if (loading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="36" />
+  </div>
+} @else if (summary(); as s) {
+  <h2 class="section-title">Tickets by status</h2>
+  <div class="stat-grid">
+    <a class="stat-card status-open" [routerLink]="['/tickets']" [queryParams]="{ status: 'Open' }">
+      <mat-icon>inbox</mat-icon>
+      <span class="stat-value">{{ s.openCount }}</span>
+      <span class="stat-label">Open</span>
+    </a>
+    <a class="stat-card status-inprogress" [routerLink]="['/tickets']" [queryParams]="{ status: 'InProgress' }">
+      <mat-icon>autorenew</mat-icon>
+      <span class="stat-value">{{ s.inProgressCount }}</span>
+      <span class="stat-label">In Progress</span>
+    </a>
+    <a class="stat-card status-waitingforuser" [routerLink]="['/tickets']" [queryParams]="{ status: 'WaitingForUser' }">
+      <mat-icon>hourglass_empty</mat-icon>
+      <span class="stat-value">{{ s.waitingForUserCount }}</span>
+      <span class="stat-label">Waiting for User</span>
+    </a>
+    <a class="stat-card status-escalated" [routerLink]="['/tickets']" [queryParams]="{ status: 'Escalated' }">
+      <mat-icon>report</mat-icon>
+      <span class="stat-value">{{ s.escalatedCount }}</span>
+      <span class="stat-label">Escalated</span>
+    </a>
+    <a class="stat-card status-resolved" [routerLink]="['/tickets']" [queryParams]="{ status: 'Resolved' }">
+      <mat-icon>check_circle</mat-icon>
+      <span class="stat-value">{{ s.resolvedCount }}</span>
+      <span class="stat-label">Resolved</span>
+    </a>
+    <a class="stat-card status-closed" [routerLink]="['/tickets']" [queryParams]="{ status: 'Closed' }">
+      <mat-icon>lock</mat-icon>
+      <span class="stat-value">{{ s.closedCount }}</span>
+      <span class="stat-label">Closed</span>
+    </a>
+    <a class="stat-card status-reopened" [routerLink]="['/tickets']" [queryParams]="{ status: 'Reopened' }">
+      <mat-icon>replay</mat-icon>
+      <span class="stat-value">{{ s.reopenedCount }}</span>
+      <span class="stat-label">Reopened</span>
+    </a>
+  </div>
+
+  @if (isAgentOrAdmin()) {
+    <h2 class="section-title">Agent overview</h2>
+    <div class="stat-grid">
+      <a
+        class="stat-card highlight-primary"
+        [routerLink]="['/tickets']"
+        [queryParams]="{ assignedAgentId: auth.currentUser()?.id }"
+      >
+        <mat-icon>person</mat-icon>
+        <span class="stat-value">{{ s.myAssignedCount }}</span>
+        <span class="stat-label">My Tickets</span>
+      </a>
+      <a class="stat-card highlight-neutral" [routerLink]="['/tickets']" [queryParams]="{ unassigned: true }">
+        <mat-icon>person_off</mat-icon>
+        <span class="stat-value">{{ s.unassignedCount }}</span>
+        <span class="stat-label">Unassigned</span>
+      </a>
+      <a class="stat-card highlight-warn" [routerLink]="['/tickets']" [queryParams]="{ overdue: true }">
+        <mat-icon>schedule</mat-icon>
+        <span class="stat-value">{{ s.overdueCount }}</span>
+        <span class="stat-label">Overdue</span>
+      </a>
+      <a class="stat-card highlight-critical" [routerLink]="['/tickets']" [queryParams]="{ priority: 'Critical' }">
+        <mat-icon>priority_high</mat-icon>
+        <span class="stat-value">{{ s.criticalOpenCount }}</span>
+        <span class="stat-label">Critical</span>
+      </a>
+    </div>
+  }
+}

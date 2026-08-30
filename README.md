@@ -76,6 +76,6 @@ Seeded automatically on first run (password for all: `Password123!`):
 - [x] Phase 5 — Agent functionality
 - [x] Phase 6 — SignalR real-time updates
 - [x] Phase 7 — SLA monitoring & background service
-- [ ] Phase 8 — Dashboard
+- [x] Phase 8 — Dashboard
 - [ ] Phase 9 — Reports
 - [ ] Phase 10 — Testing, Docker hardening, final README
