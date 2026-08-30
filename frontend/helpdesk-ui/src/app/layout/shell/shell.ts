@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, effect, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -39,11 +39,16 @@ export class Shell implements OnInit, OnDestroy {
   private readonly notificationApi = inject(NotificationApi);
   private readonly snackBar = inject(MatSnackBar);
 
-  protected readonly navItems = [
+  private readonly allNavItems = [
     { label: 'Dashboard', icon: 'dashboard', path: '/dashboard' },
     { label: 'Tickets', icon: 'confirmation_number', path: '/tickets' },
-    { label: 'New Ticket', icon: 'add_circle', path: '/tickets/new' }
+    { label: 'New Ticket', icon: 'add_circle', path: '/tickets/new' },
+    { label: 'Reports', icon: 'bar_chart', path: '/reports', roles: ['Admin'] as const }
   ];
+
+  protected readonly navItems = computed(() =>
+    this.allNavItems.filter((item) => !item.roles || this.auth.hasRole(...item.roles))
+  );
 
   protected readonly notifications = signal<AppNotification[]>([]);
   protected readonly unreadCount = signal(0);
