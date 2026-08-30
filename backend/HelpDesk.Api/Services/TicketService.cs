@@ -217,6 +217,264 @@ public class TicketService(ApplicationDbContext db, ICurrentUserService currentU
         return new TicketCommentDto(comment.Id, comment.AuthorId, author?.Name ?? "Unknown", comment.Message, comment.CreatedAt);
     }
 
+    public async Task<TicketDetailDto> ChangeStatusAsync(int ticketId, TicketStatus status)
+    {
+        var ticket = await LoadTicketForDetailAsync(ticketId);
+        EnsureCanView(ticket);
+
+        var isOwnerReopening = status == TicketStatus.Reopened
+            && ticket.Status == TicketStatus.Resolved
+            && ticket.CreatedById == currentUser.UserId;
+
+        if (currentUser.Role == UserRole.Employee && !isOwnerReopening)
+        {
+            throw new ForbiddenAppException("You are not allowed to change this ticket's status.");
+        }
+
+        if (!TicketLifecycle.CanTransition(ticket.Status, status))
+        {
+            throw new BadRequestAppException($"Cannot move a ticket from {ticket.Status} to {status}.");
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        var oldStatus = ticket.Status;
+        ticket.Status = status;
+        ticket.UpdatedAt = now;
+
+        switch (status)
+        {
+            case TicketStatus.Resolved:
+                ticket.ResolvedAt = now;
+                break;
+            case TicketStatus.Closed:
+                ticket.ClosedAt = now;
+                break;
+            case TicketStatus.Reopened:
+                ticket.ResolvedAt = null;
+                ticket.ClosedAt = null;
+                break;
+        }
+
+        var activityType = status switch
+        {
+            TicketStatus.Resolved => TicketActivityType.Resolved,
+            TicketStatus.Reopened => TicketActivityType.Reopened,
+            TicketStatus.Closed => TicketActivityType.Closed,
+            TicketStatus.Escalated => TicketActivityType.Escalated,
+            _ => TicketActivityType.StatusChanged
+        };
+
+        db.TicketActivities.Add(new TicketActivity
+        {
+            TicketId = ticketId,
+            UserId = currentUser.UserId,
+            Type = activityType,
+            Description = $"Status changed: {oldStatus} → {status}",
+            OldValue = oldStatus.ToString(),
+            NewValue = status.ToString(),
+            CreatedAt = now
+        });
+
+        AddNotification(ticket, $"Ticket \"{ticket.Title}\" status changed to {status}", NotificationType.StatusChanged, now);
+
+        await db.SaveChangesAsync();
+
+        var reloaded = await LoadTicketForDetailAsync(ticketId);
+        return ToDetailDto(reloaded);
+    }
+
+    public async Task<TicketDetailDto> AssignAsync(int ticketId, int? agentId)
+    {
+        if (currentUser.Role == UserRole.Employee)
+        {
+            throw new ForbiddenAppException("Only agents or admins can assign tickets.");
+        }
+
+        var ticket = await LoadTicketForDetailAsync(ticketId);
+
+        User? agent = null;
+        if (agentId is not null)
+        {
+            agent = await db.Users.FindAsync(agentId.Value);
+            if (agent is null || agent.Role is not (UserRole.Agent or UserRole.Admin))
+            {
+                throw new BadRequestAppException("Invalid agent.");
+            }
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        var oldAgentName = ticket.AssignedAgent?.Name ?? "Unassigned";
+        ticket.AssignedAgentId = agent?.Id;
+        ticket.UpdatedAt = now;
+
+        var wasOpen = ticket.Status == TicketStatus.Open;
+        if (wasOpen && agent is not null)
+        {
+            ticket.Status = TicketStatus.InProgress;
+        }
+
+        db.TicketActivities.Add(new TicketActivity
+        {
+            TicketId = ticketId,
+            UserId = currentUser.UserId,
+            Type = TicketActivityType.Assigned,
+            Description = $"Ticket assigned to {agent?.Name ?? "nobody"}",
+            OldValue = oldAgentName,
+            NewValue = agent?.Name ?? "Unassigned",
+            CreatedAt = now
+        });
+
+        if (wasOpen && agent is not null)
+        {
+            db.TicketActivities.Add(new TicketActivity
+            {
+                TicketId = ticketId,
+                UserId = currentUser.UserId,
+                Type = TicketActivityType.StatusChanged,
+                Description = $"Status changed: {TicketStatus.Open} → {TicketStatus.InProgress}",
+                OldValue = TicketStatus.Open.ToString(),
+                NewValue = TicketStatus.InProgress.ToString(),
+                CreatedAt = now
+            });
+        }
+
+        if (agent is not null && agent.Id != currentUser.UserId)
+        {
+            db.Notifications.Add(new Notification
+            {
+                UserId = agent.Id,
+                TicketId = ticketId,
+                Message = $"You were assigned to ticket \"{ticket.Title}\"",
+                Type = NotificationType.TicketAssigned,
+                CreatedAt = now
+            });
+        }
+
+        await db.SaveChangesAsync();
+
+        var reloaded = await LoadTicketForDetailAsync(ticketId);
+        return ToDetailDto(reloaded);
+    }
+
+    public async Task<TicketDetailDto> ChangePriorityAsync(int ticketId, TicketPriority priority)
+    {
+        if (currentUser.Role == UserRole.Employee)
+        {
+            throw new ForbiddenAppException("Only agents or admins can change ticket priority.");
+        }
+
+        var ticket = await LoadTicketForDetailAsync(ticketId);
+
+        var slaPolicy = await db.SlaPolicies.FirstOrDefaultAsync(s => s.Priority == priority)
+            ?? throw new BadRequestAppException("No SLA policy configured for this priority.");
+
+        var now = DateTimeOffset.UtcNow;
+        var oldPriority = ticket.Priority;
+        ticket.Priority = priority;
+        ticket.ResponseDueAt = ticket.CreatedAt.AddMinutes(slaPolicy.ResponseTimeMinutes);
+        ticket.ResolutionDueAt = ticket.CreatedAt.AddMinutes(slaPolicy.ResolutionTimeMinutes);
+        ticket.UpdatedAt = now;
+
+        db.TicketActivities.Add(new TicketActivity
+        {
+            TicketId = ticketId,
+            UserId = currentUser.UserId,
+            Type = TicketActivityType.PriorityChanged,
+            Description = $"Priority changed: {oldPriority} → {priority}",
+            OldValue = oldPriority.ToString(),
+            NewValue = priority.ToString(),
+            CreatedAt = now
+        });
+
+        AddNotification(ticket, $"Ticket \"{ticket.Title}\" priority changed to {priority}", NotificationType.PriorityChanged, now);
+
+        var shouldAutoEscalate = priority == TicketPriority.Critical
+            && TicketLifecycle.CanTransition(ticket.Status, TicketStatus.Escalated);
+
+        await db.SaveChangesAsync();
+
+        if (shouldAutoEscalate)
+        {
+            return await EscalateAsync(ticketId);
+        }
+
+        var reloaded = await LoadTicketForDetailAsync(ticketId);
+        return ToDetailDto(reloaded);
+    }
+
+    public async Task<TicketDetailDto> EscalateAsync(int ticketId)
+    {
+        if (currentUser.Role == UserRole.Employee)
+        {
+            throw new ForbiddenAppException("Only agents or admins can escalate tickets.");
+        }
+
+        var ticket = await LoadTicketForDetailAsync(ticketId);
+
+        if (!TicketLifecycle.CanTransition(ticket.Status, TicketStatus.Escalated))
+        {
+            throw new BadRequestAppException($"Cannot escalate a ticket from status {ticket.Status}.");
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        var oldStatus = ticket.Status;
+        ticket.Status = TicketStatus.Escalated;
+        ticket.UpdatedAt = now;
+
+        db.TicketActivities.Add(new TicketActivity
+        {
+            TicketId = ticketId,
+            UserId = currentUser.UserId,
+            Type = TicketActivityType.Escalated,
+            Description = $"Ticket escalated ({oldStatus} → {TicketStatus.Escalated})",
+            OldValue = oldStatus.ToString(),
+            NewValue = TicketStatus.Escalated.ToString(),
+            CreatedAt = now
+        });
+
+        var recipientIds = new HashSet<int>();
+        if (ticket.AssignedAgentId is not null) recipientIds.Add(ticket.AssignedAgentId.Value);
+        var adminIds = await db.Users.Where(u => u.Role == UserRole.Admin).Select(u => u.Id).ToListAsync();
+        foreach (var adminId in adminIds) recipientIds.Add(adminId);
+        recipientIds.Remove(currentUser.UserId);
+
+        foreach (var recipientId in recipientIds)
+        {
+            db.Notifications.Add(new Notification
+            {
+                UserId = recipientId,
+                TicketId = ticketId,
+                Message = $"Ticket \"{ticket.Title}\" was escalated",
+                Type = NotificationType.TicketEscalated,
+                CreatedAt = now
+            });
+        }
+
+        await db.SaveChangesAsync();
+
+        var reloaded = await LoadTicketForDetailAsync(ticketId);
+        return ToDetailDto(reloaded);
+    }
+
+    private void AddNotification(Ticket ticket, string message, NotificationType type, DateTimeOffset now)
+    {
+        var recipientIds = new HashSet<int> { ticket.CreatedById };
+        if (ticket.AssignedAgentId is not null) recipientIds.Add(ticket.AssignedAgentId.Value);
+        recipientIds.Remove(currentUser.UserId);
+
+        foreach (var recipientId in recipientIds)
+        {
+            db.Notifications.Add(new Notification
+            {
+                UserId = recipientId,
+                TicketId = ticket.Id,
+                Message = message,
+                Type = type,
+                CreatedAt = now
+            });
+        }
+    }
+
     private async Task<Ticket> LoadTicketForDetailAsync(int id)
     {
         return await db.Tickets

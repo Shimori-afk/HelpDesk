@@ -14,7 +14,9 @@ public class TicketsController(
     ITicketService ticketService,
     IValidator<CreateTicketDto> createValidator,
     IValidator<UpdateTicketDto> updateValidator,
-    IValidator<CreateCommentDto> commentValidator) : ControllerBase
+    IValidator<CreateCommentDto> commentValidator,
+    IValidator<ChangeStatusDto> statusValidator,
+    IValidator<ChangePriorityDto> priorityValidator) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult> GetTickets([FromQuery] TicketQueryParameters query)
@@ -67,5 +69,38 @@ public class TicketsController(
         await commentValidator.ValidateAndThrowAppExceptionAsync(dto);
         var comment = await ticketService.AddCommentAsync(id, dto);
         return Ok(comment);
+    }
+
+    [HttpPut("{id:int}/status")]
+    public async Task<ActionResult<TicketDetailDto>> ChangeStatus(int id, ChangeStatusDto dto)
+    {
+        await statusValidator.ValidateAndThrowAppExceptionAsync(dto);
+        var ticket = await ticketService.ChangeStatusAsync(id, dto.Status);
+        return Ok(ticket);
+    }
+
+    [Authorize(Roles = "Agent,Admin")]
+    [HttpPut("{id:int}/assign")]
+    public async Task<ActionResult<TicketDetailDto>> Assign(int id, AssignTicketDto dto)
+    {
+        var ticket = await ticketService.AssignAsync(id, dto.AgentId);
+        return Ok(ticket);
+    }
+
+    [Authorize(Roles = "Agent,Admin")]
+    [HttpPut("{id:int}/priority")]
+    public async Task<ActionResult<TicketDetailDto>> ChangePriority(int id, ChangePriorityDto dto)
+    {
+        await priorityValidator.ValidateAndThrowAppExceptionAsync(dto);
+        var ticket = await ticketService.ChangePriorityAsync(id, dto.Priority);
+        return Ok(ticket);
+    }
+
+    [Authorize(Roles = "Agent,Admin")]
+    [HttpPost("{id:int}/escalate")]
+    public async Task<ActionResult<TicketDetailDto>> Escalate(int id)
+    {
+        var ticket = await ticketService.EscalateAsync(id);
+        return Ok(ticket);
     }
 }

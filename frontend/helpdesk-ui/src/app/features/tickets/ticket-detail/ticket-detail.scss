@@ -141,6 +141,33 @@
   width: 100%;
 }
 
+.actions-card {
+  .full-width {
+    width: 100%;
+  }
+}
+
+.status-actions {
+  margin-bottom: 12px;
+
+  .label {
+    display: block;
+    font-size: 0.75rem;
+    opacity: 0.6;
+    margin-bottom: 6px;
+  }
+}
+
+.status-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.escalate-button {
+  margin-top: 4px;
+}
+
 .timeline {
   display: flex;
   flex-direction: column;

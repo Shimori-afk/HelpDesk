@@ -9,7 +9,9 @@ import {
   TicketComment,
   TicketDetail,
   TicketListItem,
+  TicketPriority,
   TicketQuery,
+  TicketStatus,
   UpdateTicketRequest
 } from '../models/ticket.model';
 
@@ -50,5 +52,21 @@ export class Ticket {
 
   addComment(id: number, message: string): Observable<TicketComment> {
     return this.http.post<TicketComment>(`${this.baseUrl}/${id}/comments`, { message });
+  }
+
+  changeStatus(id: number, status: TicketStatus): Observable<TicketDetail> {
+    return this.http.put<TicketDetail>(`${this.baseUrl}/${id}/status`, { status });
+  }
+
+  assign(id: number, agentId: number | null): Observable<TicketDetail> {
+    return this.http.put<TicketDetail>(`${this.baseUrl}/${id}/assign`, { agentId });
+  }
+
+  changePriority(id: number, priority: TicketPriority): Observable<TicketDetail> {
+    return this.http.put<TicketDetail>(`${this.baseUrl}/${id}/priority`, { priority });
+  }
+
+  escalate(id: number): Observable<TicketDetail> {
+    return this.http.post<TicketDetail>(`${this.baseUrl}/${id}/escalate`, {});
   }
 }

@@ -13,6 +13,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { Ticket as TicketApi } from '../../../core/services/ticket';
+import { Auth } from '../../../core/services/auth';
 import { TicketListItem, TicketPriority, TicketQuery, TicketStatus } from '../../../core/models/ticket.model';
 
 const STATUSES: TicketStatus[] = ['Open', 'InProgress', 'WaitingForUser', 'Escalated', 'Resolved', 'Closed', 'Reopened'];
@@ -40,6 +41,7 @@ const PRIORITIES: TicketPriority[] = ['Low', 'Medium', 'High', 'Critical'];
 })
 export class TicketList implements OnInit {
   private readonly ticketApi = inject(TicketApi);
+  protected readonly auth = inject(Auth);
   private readonly searchInput$ = new Subject<string>();
 
   protected readonly statuses = STATUSES;
@@ -55,6 +57,7 @@ export class TicketList implements OnInit {
   protected search = '';
   protected statusFilter: TicketStatus | '' = '';
   protected priorityFilter: TicketPriority | '' = '';
+  protected quickFilter: 'all' | 'mine' | 'unassigned' = 'all';
   protected page = 0;
   protected pageSize = 20;
 
@@ -72,6 +75,12 @@ export class TicketList implements OnInit {
   }
 
   onFilterChange(): void {
+    this.page = 0;
+    this.load();
+  }
+
+  setQuickFilter(filter: 'all' | 'mine' | 'unassigned'): void {
+    this.quickFilter = filter;
     this.page = 0;
     this.load();
   }
@@ -96,6 +105,8 @@ export class TicketList implements OnInit {
       search: this.search || undefined,
       status: this.statusFilter || undefined,
       priority: this.priorityFilter || undefined,
+      assignedAgentId: this.quickFilter === 'mine' ? this.auth.currentUser()?.id : undefined,
+      unassigned: this.quickFilter === 'unassigned' ? true : undefined,
       page: this.page + 1,
       pageSize: this.pageSize
     };

@@ -9,6 +9,16 @@
   }
 }
 
+.quick-filters {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  .active {
+    background: var(--mat-sys-primary-container);
+  }
+}
+
 .filters {
   display: flex;
   flex-wrap: wrap;
