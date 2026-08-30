@@ -83,3 +83,16 @@ table {
 .priority-medium { background: #fff8e1; color: #8d6e00; }
 .priority-high { background: #ffe0b2; color: #e65100; }
 .priority-critical { background: #ffcdd2; color: #b71c1c; }
+
+.sla-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.sla-withinsla { background: #2e7d32; }
+.sla-approachingbreach { background: #f57f17; }
+.sla-breached { background: #c62828; }

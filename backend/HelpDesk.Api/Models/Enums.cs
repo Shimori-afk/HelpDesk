@@ -52,5 +52,14 @@ public enum NotificationType
     StatusChanged,
     CommentAdded,
     TicketEscalated,
-    TicketResolved
+    TicketResolved,
+    SlaApproaching,
+    SlaBreached
+}
+
+public enum SlaState
+{
+    WithinSla,
+    ApproachingBreach,
+    Breached
 }

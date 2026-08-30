@@ -24,6 +24,7 @@ public record TicketDetailDto(
     DateTimeOffset ResponseDueAt,
     DateTimeOffset ResolutionDueAt,
     DateTimeOffset? RespondedAt,
+    SlaState SlaState,
     IReadOnlyList<TicketCommentDto> Comments,
     IReadOnlyList<TicketActivityDto> Activities,
     IReadOnlyList<AttachmentDto> Attachments);

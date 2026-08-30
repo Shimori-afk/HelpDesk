@@ -14,7 +14,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { Ticket as TicketApi } from '../../../core/services/ticket';
 import { Auth } from '../../../core/services/auth';
-import { TicketListItem, TicketPriority, TicketQuery, TicketStatus } from '../../../core/models/ticket.model';
+import { SlaState, TicketListItem, TicketPriority, TicketQuery, TicketStatus } from '../../../core/models/ticket.model';
 
 const STATUSES: TicketStatus[] = ['Open', 'InProgress', 'WaitingForUser', 'Escalated', 'Resolved', 'Closed', 'Reopened'];
 const PRIORITIES: TicketPriority[] = ['Low', 'Medium', 'High', 'Critical'];
@@ -97,6 +97,21 @@ export class TicketList implements OnInit {
 
   protected priorityClass(priority: TicketPriority): string {
     return `priority-${priority.toLowerCase()}`;
+  }
+
+  protected slaClass(state: SlaState): string {
+    return `sla-${state.toLowerCase()}`;
+  }
+
+  protected slaLabel(state: SlaState): string {
+    switch (state) {
+      case 'Breached':
+        return 'SLA breached';
+      case 'ApproachingBreach':
+        return 'Approaching SLA deadline';
+      default:
+        return 'Within SLA';
+    }
   }
 
   private load(): void {

@@ -1,5 +1,6 @@
 using System.Text;
 using FluentValidation;
+using HelpDesk.Api.BackgroundServices;
 using HelpDesk.Api.Common;
 using HelpDesk.Api.Data;
 using HelpDesk.Api.Hubs;
@@ -97,6 +98,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 builder.Services.AddScoped<INotificationDispatcher, NotificationDispatcher>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+builder.Services.AddHostedService<SlaMonitoringService>();
 
 const string AngularClientPolicy = "AngularClient";
 builder.Services.AddCors(options =>

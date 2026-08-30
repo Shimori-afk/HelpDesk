@@ -34,6 +34,9 @@
         <div class="meta-row">
           <span class="chip" [ngClass]="statusClass()">{{ t.status }}</span>
           <span class="chip" [ngClass]="priorityClass()">{{ t.priority }}</span>
+          <span class="chip sla-chip" [ngClass]="slaClass()">
+            <span class="sla-dot"></span>{{ slaLabel(t.slaState) }}
+          </span>
           <span class="meta-item">{{ t.categoryName }}</span>
           @if (t.departmentName) {
             <span class="meta-item">{{ t.departmentName }}</span>
@@ -55,6 +58,10 @@
           <div>
             <span class="label">Created</span>
             <span>{{ t.createdAt | date: 'medium' }}</span>
+          </div>
+          <div>
+            <span class="label">Resolution due</span>
+            <span>{{ t.resolutionDueAt | date: 'medium' }}</span>
           </div>
         </div>
 

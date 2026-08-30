@@ -4,7 +4,7 @@ namespace HelpDesk.Api.DTOs.Tickets;
 
 public record TicketActivityDto(
     int Id,
-    int UserId,
+    int? UserId,
     string UserName,
     TicketActivityType Type,
     string? Description,

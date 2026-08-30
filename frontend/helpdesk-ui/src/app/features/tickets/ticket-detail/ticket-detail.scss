@@ -66,6 +66,23 @@
 .priority-high { background: #ffe0b2; color: #e65100; }
 .priority-critical { background: #ffcdd2; color: #b71c1c; }
 
+.sla-chip {
+  display: inline-flex;
+  align-items: center;
+}
+
+.sla-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.sla-withinsla { background: #e8f5e9; color: #1b5e20; .sla-dot { background: #2e7d32; } }
+.sla-approachingbreach { background: #fff3e0; color: #8d6e00; .sla-dot { background: #f57f17; } }
+.sla-breached { background: #ffebee; color: #b71c1c; .sla-dot { background: #c62828; } }
+
 .meta-item {
   font-size: 0.875rem;
   opacity: 0.75;

@@ -20,6 +20,6 @@ public class TicketActivityConfiguration : IEntityTypeConfiguration<TicketActivi
         builder.HasOne(a => a.User)
             .WithMany(u => u.Activities)
             .HasForeignKey(a => a.UserId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

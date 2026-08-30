@@ -9,6 +9,8 @@ export type TicketStatus =
 
 export type TicketPriority = 'Low' | 'Medium' | 'High' | 'Critical';
 
+export type SlaState = 'WithinSla' | 'ApproachingBreach' | 'Breached';
+
 export type TicketActivityType =
   | 'Created'
   | 'Assigned'
@@ -35,6 +37,7 @@ export interface TicketListItem {
   responseDueAt: string;
   resolutionDueAt: string;
   resolvedAt: string | null;
+  slaState: SlaState;
 }
 
 export interface TicketComment {
@@ -47,7 +50,7 @@ export interface TicketComment {
 
 export interface TicketActivity {
   id: number;
-  userId: number;
+  userId: number | null;
   userName: string;
   type: TicketActivityType;
   description: string | null;
@@ -86,6 +89,7 @@ export interface TicketDetail {
   responseDueAt: string;
   resolutionDueAt: string;
   respondedAt: string | null;
+  slaState: SlaState;
   comments: TicketComment[];
   activities: TicketActivity[];
   attachments: TicketAttachment[];

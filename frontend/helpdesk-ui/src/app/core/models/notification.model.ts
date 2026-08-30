@@ -4,7 +4,9 @@ export type NotificationType =
   | 'StatusChanged'
   | 'CommentAdded'
   | 'TicketEscalated'
-  | 'TicketResolved';
+  | 'TicketResolved'
+  | 'SlaApproaching'
+  | 'SlaBreached';
 
 export interface AppNotification {
   id: number;

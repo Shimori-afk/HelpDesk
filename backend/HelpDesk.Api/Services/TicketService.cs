@@ -56,16 +56,31 @@ public class TicketService(ApplicationDbContext db, ICurrentUserService currentU
 
         var totalCount = await tickets.CountAsync();
 
-        var items = await tickets
+        var rows = await tickets
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
-            .Select(t => new TicketListItemDto(
+            .Select(t => new
+            {
                 t.Id, t.Title, t.Status, t.Priority,
-                t.Category.Name, t.Department != null ? t.Department.Name : null,
-                t.CreatedById, t.CreatedBy.Name,
-                t.AssignedAgentId, t.AssignedAgent != null ? t.AssignedAgent.Name : null,
-                t.CreatedAt, t.ResponseDueAt, t.ResolutionDueAt, t.ResolvedAt))
+                CategoryName = t.Category.Name,
+                DepartmentName = t.Department != null ? t.Department.Name : null,
+                t.CreatedById,
+                RequesterName = t.CreatedBy.Name,
+                t.AssignedAgentId,
+                AssignedAgentName = t.AssignedAgent != null ? t.AssignedAgent.Name : null,
+                t.CreatedAt, t.ResponseDueAt, t.ResolutionDueAt, t.ResolvedAt
+            })
             .ToListAsync();
+
+        var now = DateTimeOffset.UtcNow;
+        var items = rows.Select(r => new TicketListItemDto(
+                r.Id, r.Title, r.Status, r.Priority,
+                r.CategoryName, r.DepartmentName,
+                r.CreatedById, r.RequesterName,
+                r.AssignedAgentId, r.AssignedAgentName,
+                r.CreatedAt, r.ResponseDueAt, r.ResolutionDueAt, r.ResolvedAt,
+                SlaCalculator.ComputeState(r.Status, r.CreatedAt, r.ResolutionDueAt, r.ResolvedAt, now)))
+            .ToList();
 
         return new PagedResult<TicketListItemDto>(items, totalCount, query.Page, query.PageSize);
     }
@@ -490,10 +505,11 @@ public class TicketService(ApplicationDbContext db, ICurrentUserService currentU
         t.CategoryId, t.Category.Name, t.DepartmentId, t.Department?.Name,
         t.CreatedById, t.CreatedBy.Name, t.AssignedAgentId, t.AssignedAgent?.Name,
         t.CreatedAt, t.UpdatedAt, t.ResolvedAt, t.ClosedAt, t.ResponseDueAt, t.ResolutionDueAt, t.RespondedAt,
+        SlaCalculator.ComputeState(t, DateTimeOffset.UtcNow),
         t.Comments.OrderBy(c => c.CreatedAt).Select(c => new TicketCommentDto(c.Id, c.AuthorId, c.Author.Name, c.Message, c.CreatedAt)).ToList(),
         t.Activities.OrderBy(a => a.CreatedAt).Select(ToActivityDto).ToList(),
         t.Attachments.Select(a => new AttachmentDto(a.Id, a.FileName, a.ContentType, a.SizeBytes, a.CreatedAt)).ToList());
 
     private static TicketActivityDto ToActivityDto(TicketActivity a) =>
-        new(a.Id, a.UserId, a.User.Name, a.Type, a.Description, a.OldValue, a.NewValue, a.CreatedAt);
+        new(a.Id, a.UserId, a.User?.Name ?? "System", a.Type, a.Description, a.OldValue, a.NewValue, a.CreatedAt);
 }

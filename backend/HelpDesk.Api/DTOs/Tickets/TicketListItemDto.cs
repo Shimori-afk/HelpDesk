@@ -16,4 +16,5 @@ public record TicketListItemDto(
     DateTimeOffset CreatedAt,
     DateTimeOffset ResponseDueAt,
     DateTimeOffset ResolutionDueAt,
-    DateTimeOffset? ResolvedAt);
+    DateTimeOffset? ResolvedAt,
+    SlaState SlaState);

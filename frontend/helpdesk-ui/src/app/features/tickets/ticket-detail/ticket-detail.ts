@@ -15,7 +15,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Ticket as TicketApi } from '../../../core/services/ticket';
 import { User as UserApi } from '../../../core/services/user';
 import { Auth } from '../../../core/services/auth';
-import { TicketDetail as TicketDetailModel, TicketPriority, TicketStatus } from '../../../core/models/ticket.model';
+import { SlaState, TicketDetail as TicketDetailModel, TicketPriority, TicketStatus } from '../../../core/models/ticket.model';
 import { User } from '../../../core/models/user.model';
 import { ApiError } from '../../../core/models/api-error.model';
 
@@ -101,6 +101,21 @@ export class TicketDetail implements OnInit {
 
   protected priorityClass(): string {
     return `priority-${this.ticket()?.priority.toLowerCase()}`;
+  }
+
+  protected slaClass(): string {
+    return `sla-${(this.ticket()?.slaState ?? 'WithinSla').toLowerCase()}`;
+  }
+
+  protected slaLabel(state: SlaState): string {
+    switch (state) {
+      case 'Breached':
+        return 'SLA breached';
+      case 'ApproachingBreach':
+        return 'Approaching SLA deadline';
+      default:
+        return 'Within SLA';
+    }
   }
 
   protected submitComment(): void {
