@@ -18,7 +18,6 @@ frontend/**/npm-debug.log*
 # IDE
 .vscode/
 .idea/
-.claude/
 
 # OS
 .DS_Store

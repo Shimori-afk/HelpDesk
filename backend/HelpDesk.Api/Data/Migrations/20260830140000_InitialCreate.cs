@@ -9,10 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace HelpDesk.Api.Data.Migrations
 {
-    // Hand-authored (dotnet-ef design-time tooling is blocked by Smart App Control on the dev
-    // machine this project was built on). No ModelSnapshot/Designer.cs is generated alongside
-    // this file since those are design-time-only artifacts; Database.MigrateAsync() at startup
-    // only needs Up()/Down() plus the [Migration]/[DbContext] attributes below to apply it.
+    // Written by hand: dotnet-ef is blocked on my machine, so there is no ModelSnapshot.
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20260830140000_InitialCreate")]
     public partial class InitialCreate : Migration

@@ -5,7 +5,7 @@ namespace HelpDesk.Api.Common;
 public static class SlaCalculator
 {
     // Once less than this fraction of the resolution window remains, the ticket is flagged as
-    // approaching breach (🟠) rather than comfortably within SLA (🟢).
+    // approaching breach.
     private const double ApproachingThresholdFraction = 0.2;
 
     public static SlaState ComputeState(TicketStatus status, DateTimeOffset createdAt, DateTimeOffset resolutionDueAt, DateTimeOffset? resolvedAt, DateTimeOffset now)

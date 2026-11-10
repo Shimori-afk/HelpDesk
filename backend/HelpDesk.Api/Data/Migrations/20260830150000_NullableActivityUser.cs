@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace HelpDesk.Api.Data.Migrations
 {
-    // Hand-authored, see the note on InitialCreate. Makes TicketActivities.UserId nullable so the
+    // Written by hand, see InitialCreate. Makes TicketActivities.UserId nullable so the
     // SLA background service can log system-generated activity (e.g. auto-escalation on breach)
     // without attributing it to a human user.
     [DbContext(typeof(ApplicationDbContext))]
